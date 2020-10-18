@@ -179,7 +179,7 @@ void Draw() {
     //dodeca.renderDodecahedron(0, U);
     
     //sponge.renderMengerSponge(U, iter2%8000);
-    map.renderMatrixMengerList(U, iter2%8000);
+    map.renderMatrixMengerList(U, 1000);
     //sponge.v.renderMatrixSphere(3, U);
 
     //triangle.renderFacetOpenGL(3, U);
