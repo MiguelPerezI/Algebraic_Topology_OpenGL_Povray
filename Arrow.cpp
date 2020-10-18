@@ -1,3 +1,6 @@
+/*This is a special class that defines a simplicial complex
+whose geometric realization is an arrow*/
+
 #include <math.h>
 #include <GL/glut.h>
 #include <stdio.h>
