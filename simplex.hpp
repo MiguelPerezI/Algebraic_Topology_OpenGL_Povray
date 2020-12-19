@@ -19,11 +19,10 @@ using namespace std;
 //////////////////////////////////////
 
 class MatrixInt {
-    private:
+       
+    public:
     	int m, n;
         int * * A;
-        
-    public:
         void initMatrixInt(int, int);
         void zeroMatrixInt(int, int);
         int getM();

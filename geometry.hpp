@@ -285,8 +285,6 @@ class MengerSponge {
     public:
         int n;
         MatrixCubeList order;
-        MatR3 skeleton;
-        MatrixSphere v;
 
         void initMengerSponge(int n, double, VectorND);
         void renderMengerSponge(RotationMats U, int);

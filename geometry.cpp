@@ -93,14 +93,32 @@ void Facet::updateFacet(VectorND a, VectorND b, VectorND c) {
 
 void Facet::renderFacetOpenGL(int mod, RotationMats U) {
 
-	if (mod%8 == 0) glColor3ub(255, 255, 255);
-	if (mod%8 == 1) glColor3ub(  0, 255, 255);
-	if (mod%8 == 2) glColor3ub(  0,   0, 255);
-	if (mod%8 == 3) glColor3ub(255,   0, 255);
-	if (mod%8 == 4) glColor3ub(255, 255, 	 0);
-	if (mod%8 == 5) glColor3ub(  0, 255, 	 0);
-	if (mod%8 == 6) glColor3ub(255, 150, 	 0);
-	if (mod%8 == 7) glColor3ub(255,   0, 	 0);
+//	if (mod%8 == 0) glColor3ub(255, 255, 255);
+//	if (mod%8 == 1) glColor3ub(  0, 255, 255);
+//	if (mod%8 == 2) glColor3ub(  0,   0, 255);
+//	if (mod%8 == 3) glColor3ub(255,   0, 255);
+//	if (mod%8 == 4) glColor3ub(255, 255, 	 0);
+//	if (mod%8 == 5) glColor3ub(  0, 255, 	 0);
+//	if (mod%8 == 6) glColor3ub(255, 150, 	 0);
+//	if (mod%8 == 7) glColor3ub(255,   0, 	 0);
+
+	double white = 255;
+	double red = 255;
+	double green = 195;
+	double blue = 170;
+	double pr = white/12;
+	if (mod%12 == 11) glColor3ub(12*red*pr, 12*green*pr, 12*blue*pr);
+	if (mod%12 == 10) glColor3ub(11*red*pr, 11*green*pr, 11*blue*pr);
+	if (mod%12 == 9) glColor3ub(10*red*pr, 10*green*pr, 10*blue*pr);
+	if (mod%12 == 8) glColor3ub( 9*red*pr,  9*green*pr,  9*blue*pr);
+	if (mod%12 == 7) glColor3ub( 8*red*pr,  8*green*pr,  8*blue*pr);
+	if (mod%12 == 6) glColor3ub( 7*red*pr,  7*green*pr,  7*blue*pr);
+	if (mod%12 == 5) glColor3ub( 6*red*pr,  6*green*pr,  6*blue*pr);
+	if (mod%12 == 4) glColor3ub( 5*red*pr,  5*green*pr,  5*blue*pr);
+	if (mod%12 == 3) glColor3ub( 4*red*pr,  4*green*pr,  4*blue*pr);
+	if (mod%12 == 2) glColor3ub( 3*red*pr,  3*green*pr,  3*blue*pr);
+	if (mod%12 == 1) glColor3ub( 2*red*pr,  2*green*pr,  2*blue*pr);
+	if (mod%12 == 0) glColor3ub( 1*red*pr,  1*green*pr,  1*blue*pr);
 
 	U.rot3D(this->normal);
 	glBegin(GL_TRIANGLES);
@@ -676,35 +694,8 @@ void MengerSponge::initMengerSponge(int n, double radius, VectorND center) {
 	this->order.initA(0, 1, 1);
 	this->order.initInitA(0, 0, 0, center, radius, 0);
 
-	this->skeleton.initMatR3Space(1, 20);
-
-	this->skeleton.A[0][0].initVectorND(3,  radius + center.access(0), radius + center.access(1), radius + center.access(2));
-	this->skeleton.A[0][1].initVectorND(3, -radius + center.access(0), radius + center.access(1), radius + center.access(2));
-	this->skeleton.A[0][2].initVectorND(3, -radius + center.access(0),-radius + center.access(1), radius + center.access(2));
-	this->skeleton.A[0][3].initVectorND(3,  radius + center.access(0),-radius + center.access(1), radius + center.access(2));
-	this->skeleton.A[0][4].initVectorND(3,  radius + center.access(0), radius + center.access(1),-radius + center.access(2));
-	this->skeleton.A[0][5].initVectorND(3, -radius + center.access(0), radius + center.access(1),-radius + center.access(2));
-	this->skeleton.A[0][6].initVectorND(3, -radius + center.access(0),-radius + center.access(1),-radius + center.access(2));
-	this->skeleton.A[0][7].initVectorND(3,  radius + center.access(0),-radius + center.access(1),-radius + center.access(2));
-
-	this->skeleton.A[0][ 8] = dilate3D(this->skeleton.A[0][1], this->skeleton.A[0][0], 0.5);
-	this->skeleton.A[0][ 9] = dilate3D(this->skeleton.A[0][2], this->skeleton.A[0][1], 0.5);
-	this->skeleton.A[0][10] = dilate3D(this->skeleton.A[0][3], this->skeleton.A[0][2], 0.5);
-	this->skeleton.A[0][11] = dilate3D(this->skeleton.A[0][0], this->skeleton.A[0][3], 0.5);
-
-	this->skeleton.A[0][12] = dilate3D(this->skeleton.A[0][5], this->skeleton.A[0][4], 0.5);
-	this->skeleton.A[0][13] = dilate3D(this->skeleton.A[0][6], this->skeleton.A[0][5], 0.5);
-	this->skeleton.A[0][14] = dilate3D(this->skeleton.A[0][7], this->skeleton.A[0][6], 0.5);
-	this->skeleton.A[0][15] = dilate3D(this->skeleton.A[0][4], this->skeleton.A[0][7], 0.5);
-
-	this->skeleton.A[0][16] = dilate3D(this->skeleton.A[0][4], this->skeleton.A[0][0], 0.5);
-	this->skeleton.A[0][17] = dilate3D(this->skeleton.A[0][5], this->skeleton.A[0][1], 0.5);
-	this->skeleton.A[0][18] = dilate3D(this->skeleton.A[0][6], this->skeleton.A[0][2], 0.5);
-	this->skeleton.A[0][19] = dilate3D(this->skeleton.A[0][7], this->skeleton.A[0][3], 0.5);
-
-	v.initMatrixSphere(1, 20);
-	for (int i = 0; i < 20; i++)
-		v.A[0][i].initSphere(20, 0.1, this->skeleton.A[0][i]);
+	/*MatrixList->MatrixCube->Cube*/
+	this->order.B[0].A[0][0].vertex[0].updateVector3D( radius + center.access(0), radius + center.access(1), radius + center.access(2) + 2.0);
 
 	printf("\n\n-->Starting Menger Sponge\n\n");
 	if (0 < n) {
@@ -738,7 +729,7 @@ void MengerSponge::renderMengerSponge(RotationMats U, int u) {
 
 	//this->order.B[0].A[0][0].renderCubeNeighborhood(U);
 	for (int i = 0; i < u; i++){
-		this->order.B[3].A[0][i].renderCubeNeighborhood(U);
+		this->order.B[2].A[0][i].renderCubeNeighborhood(U);
 	}
 }
 

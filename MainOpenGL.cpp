@@ -6,6 +6,7 @@
 #include "geometry.hpp"
 #include "dodecahedron.hpp"
 #include "simplex.hpp"
+#include "Tela.hpp"
 //////////////////////////////////////
 //                                  //
 //                                  //
@@ -13,6 +14,11 @@
 //                                  //
 //                                  //
 //////////////////////////////////////
+
+/*
+g++ ant.cpp Arrow.cpp dodecahedron.cpp Extra_Operators.hpp geometry.cpp MainOpenGL.cpp matrix.cpp PovRayWriter.cpp simplex.cpp Turtle.cpp VectorND.cpp -lm -lGL -lGLU -lglut
+
+*/
 
 /*variables*/ 
 int ciclo = 0;
@@ -56,6 +62,7 @@ Facet triangle, triangle0, triangle1, triangle2;
 VectorND copyVector;
 
 MatrixMengerList map;
+Tela tela;
 
 
 /*Funciones para dibujar sin pensar en OpenGL*/
@@ -116,36 +123,9 @@ void Setup() {
           cube0.initCubeNeighborhood(center, 1, 0);
           cube1.copyCube(cube0);
 
-          //sponge.initMengerSponge(3, 1, center);
+          sponge.initMengerSponge(3, 1, center);
+          tela.initTela("Go");
 
-          //sponge.order.B[1].dilateMatrixCubeInterval(0, 10, 0.333333, cube0.vertex[0]);
-            
-
-          triangle.initFacet(VectorND({-0.5, 0.5 * sqrt(3), 0.0}), VectorND({-0.5,-0.5 * sqrt(3), 0.0}), VectorND({1.0, 0.0, 0.0}));
-          
-          copyVector.initVectorND(3, 
-            triangle.normalK().access(0), 
-            triangle.normalK().access(1),
-            triangle.normalK().access(2));
-
-          copyVector.unit();
-          copyVector.scaleVectorND(sqrt(2.0), copyVector);
-          triangle0.initFacet(copyVector, VectorND({-0.5,-0.5 * sqrt(3), 0.0}), VectorND({1.0, 0.0, 0.0}));
-          triangle1.initFacet(VectorND({-0.5, 0.5 * sqrt(3), 0.0}), VectorND({-0.5,-0.5 * sqrt(3), 0.0}), copyVector);
-          triangle2.initFacet(VectorND({-0.5, 0.5 * sqrt(3), 0.0}), copyVector, VectorND({1.0, 0.0, 0.0}));
-          printf("\n\n\n");
-          //sponge.order.B[3].updateInversion(1.5, center);
-
-          map.initMatrixMengerList(8);
-          map.initA(0, 3, 1, VectorND({0.0, 0.0, 1.0}));
-          map.initA(1, 3, 1, VectorND({0.0, 0.0, 2.0}));
-          map.initA(2, 3, 1, VectorND({0.0, 0.0,-2.0}));
-          map.initA(3, 3, 1, VectorND({0.0, 2.0, 0.0}));
-          map.initA(4, 3, 1, VectorND({0.0,-2.0, 0.0}));
-          map.initA(5, 3, 1, VectorND({ 2.0, 0.0, 0.0}));
-          map.initA(6, 3, 1, VectorND({-2.0, 0.0, 0.0}));
-          map.initA(7, 3, 1, VectorND({ 0.0, 0.0, 4.0}));
-          map.applyInversion(1.5, VectorND({0.0, 0.0,-1.0}));
   }
 }
 
@@ -178,14 +158,9 @@ void Draw() {
     /*Draw Here*/
     //dodeca.renderDodecahedron(0, U);
     
-    //sponge.renderMengerSponge(U, iter2%8000);
-    map.renderMatrixMengerList(U, 1000);
-    //sponge.v.renderMatrixSphere(3, U);
-
-    //triangle.renderFacetOpenGL(3, U);
-    //triangle0.renderFacetOpenGL(4, U);
-    //triangle1.renderFacetOpenGL(5, U);
-    //triangle2.renderFacetOpenGL(6, U);
+    //sponge.renderMengerSponge(U, 400);
+    //map.renderMatrixMengerList(U, 1000);
+    tela.renderTela(iter1, U);
     
   }
 }
@@ -247,7 +222,7 @@ void ProcessingProto() {
 
 /*Posición y color de luz*/
 GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};
-GLfloat light_position[] = {10.0, 10.0,-16.25, 0.0};
+GLfloat light_position[] = {1.0, 1.0, 0.25, 0.0};
 
 /*Funciones de OpenGL*/
 void display(void);
@@ -318,8 +293,8 @@ void init(double theta)
                                     /* Z near */ 0.5, 
                                     /* Z far */ 10000.0);
   glMatrixMode(GL_MODELVIEW);
-  gluLookAt( 5.0, 5.0, 5.0,      /* eye is at (0,0,5) */
-             0.0, 0.0, 0.0,      /* center is at (0,0,0) */
+  gluLookAt( 5.0, 5.0, 8.0,      /* eye is at (0,0,5) */
+            -2.5, 2.5, 0.0,      /* center is at (0,0,0) */
              0.0, 0.0, 1.0);      /* up is in positive Y direction */
 
   /* Adjust Board position to be asthetic angle. */
@@ -378,8 +353,13 @@ void keyboard(unsigned char key, int x, int y) {
       break;    
 
     case 'y': 
-      iter1 += 1;
+      iter1 += 20;
       pass += 1;
+      break;
+
+    case 'Y': 
+      iter1 -= 20;
+      pass -= 1;
       break;
 
     case 'u': 
