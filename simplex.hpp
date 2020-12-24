@@ -65,6 +65,40 @@ class MatrixSimplex {
 		void updateA(int, int, Simplex);
 		void makeEqualMatrixSimplex(MatrixSimplex);
 		void escMatrixSimplex();
+
+		//onDimension Case
+		void push(Simplex);
+};
+
+class SimplexColor {
+	private:
+		int dim;
+		int d, r, b, g;
+	public:
+		void initSimplexColor(int d,int r, int g, int b);
+		int getDim();
+		void escSimplexColor();
+		void makeEqualSimplexColor(SimplexColor);
+		void zeroSimplexColor();
+		void SimplexColorProd(SimplexColor, SimplexColor);
+};
+
+class MatrixSimplexColor {
+	private:
+		int m, n;
+		SimplexColor * * A;
+	public:
+		void initMatrixSimplexColor(int, int);
+		void zeroMatrixSimplexColor(int, int);
+		int getM();
+		int getN();
+		SimplexColor getA(int, int);
+		void updateA(int, int, SimplexColor);
+		void makeEqualMatrixSimplexColor(MatrixSimplexColor);
+		void escMatrixSimplexColor();
+
+		//onDimension Case
+		void push(SimplexColor);
 };
 
 class VectorInt {

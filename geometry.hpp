@@ -54,8 +54,12 @@ class Inversion {
         void initInversion(double, VectorND);
         void updateInversion(double, VectorND);
         void applyInversion(VectorND);
+        VectorND applyInversion2(VectorND);
         VectorND returnInversion(VectorND);
         void facetInversion(Facet);
+        Facet getFacet() {
+            return facet;
+        };
 };
 
 class MatrixFacet {
@@ -108,6 +112,7 @@ class Square {
 
         void initSquare(VectorND, VectorND, VectorND, VectorND);
         void renderSquare(int, RotationMats);
+        void prepareInverionA_B(Inversion inversionA, Inversion inversionB);
 };
 
 class MatrixSquare {
@@ -127,6 +132,7 @@ class Sphere {
 
         void initSphere(int, double, VectorND);
         void renderSphere(int, RotationMats);
+        void renderByInversion(Inversion inversionA, Inversion inversionB, RotationMats U);
 };
 
 class MatrixSphere {
@@ -136,6 +142,7 @@ class MatrixSphere {
 
         void initMatrixSphere(int, int);
         void renderMatrixSphere(int, RotationMats);
+        void renderInvMatrixSphere(Inversion inversionA, Inversion inversionB, RotationMats U);
 };
 
 class MatrixSphereList {
@@ -203,6 +210,7 @@ class Torus {
 
         void initTorus(int, double, double, VectorND);
         void renderTorus(int, RotationMats);
+        void renderByInversion(Inversion inversionA, Inversion inversionB, RotationMats U);
 };
 
 class Plane {
@@ -213,7 +221,7 @@ class Plane {
         VectorND aux[4];
         MatrixSquare mesh;
 
-        void initPlane(int, double, double, VectorND);
+        void initPlane(int, double, VectorND);
         void renderPlane(int, RotationMats);
 };
 

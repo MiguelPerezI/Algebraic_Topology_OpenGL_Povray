@@ -7,6 +7,7 @@
 #include "dodecahedron.hpp"
 #include "simplex.hpp"
 #include "Tela.hpp"
+#include "Arrow.hpp"
 //////////////////////////////////////
 //                                  //
 //                                  //
@@ -38,12 +39,15 @@ int pass0 = 0;
 int pass = 0;
 int pass1 = 0;
 int pass2 = 0;
+int ITT = 35;
 
 /*Definimos Vectores que nos pueden ayudar a generar el espacio*/
 VectorND center, I, J, K, minusI, minusJ, minusK;
 
 /*Systema de rotacion para vectores*/
 RotationMats U;
+
+MatrixSphere sphereNet;
 
 /*Dodecahedron*/
 Dodecahedron dodeca, dodeca0;
@@ -53,16 +57,24 @@ MatR3 vectorMap;
 
 MatrixCubeList cubes;
 MengerSponge sponge;
+Torus torus;
 
 CubeNeighborhood cube0, cube1;
 
 /*facets*/
 
 Facet triangle, triangle0, triangle1, triangle2;
-VectorND copyVector;
+VectorND copyVector, joker;
 
 MatrixMengerList map;
 Tela tela;
+Tela tela1, tela2, tela3, tela4, tela5, tela6, tela7;
+
+Arrow xAxis;
+Arrow yAxis;
+
+Inversion InA, InB;
+Plane plane;
 
 
 /*Funciones para dibujar sin pensar en OpenGL*/
@@ -73,6 +85,7 @@ void updateProcessingProto();
 void ProcessingProto();
 
 void interface();
+MatR3 net;
 
 void interface() {
   printf("\n\nEnter the path corresponding to the simplices shown in the tree:\n\n");
@@ -103,11 +116,21 @@ void Setup() {
           minusI.initVectorND(3,-1.0, 0.0, 0.0);
           minusJ.initVectorND(3, 0.0,-1.0, 0.0);
           minusK.initVectorND(3, 0.0, 0.0,-1.0); 
+          joker.initVectorND(3, 0.0, 0.0, 0.0);
           //center.escVectorND();
-      
-          U.initRotationMats(rotSpeed);
           
-          dodeca.initDodecahedron(2, center);
+          joker.updateVector3D(-3.0, 0.0, 0.0);
+
+          U.initRotationMats(rotSpeed);
+          InA.initInversion(0.5, center);
+          InB.initInversion(0.5, center);
+          torus.initTorus(20, 1.0, 0.7, joker);
+          sponge.initMengerSponge(3, 1, joker);
+
+          joker.updateVector3D( 2.0, 0.0, 0.0);
+          dodeca.initDodecahedron(1, joker);
+          joker.updateVector3D(-2.0, 0.0, 0.0);
+          dodeca0.initDodecahedron(1, joker);
           
           vectorMap.initMatR3Space(3, 3);
           vectorMap.updateA(0, 0, 1.0, 1.01, 1.01);
@@ -123,9 +146,30 @@ void Setup() {
           cube0.initCubeNeighborhood(center, 1, 0);
           cube1.copyCube(cube0);
 
-          sponge.initMengerSponge(3, 1, center);
-          tela.initTela("Go");
+          tela.initTela("ZZDODECA1.txt");
+          tela1.initTela("ZZDODECA2.txt");
+          tela2.initTela("ZZDODECA3.txt");
+          tela3.initTela("ZZDODECA4.txt");
+          tela4.initTela("ZZDODECA5.txt");
+          tela5.initTela("ZZDODECA6.txt");
+          tela6.initTela("ZZDODECA7.txt");
+          tela7.initTela("ZZDODECA8.txt");
 
+          xAxis.aristaSet(I, center, 0.1);
+          yAxis.aristaSet(J, center, 0.1);
+
+          net.initMatR3Space(15, 15);
+          for (int i = -7; i < 7+1; i++)
+            for (int j = -7; j < 7+1; j++)
+              net.updateA(i+7, j+7,  (double)i, (double)j, 0.0);
+
+          sphereNet.initMatrixSphere(15, 15);
+
+          for (int i = -7; i < 7+1; i++)
+            for (int j = -7; j < 7+1; j++)
+              sphereNet.A[i+7][j+7].initSphere(5, 0.05, net.A[i+7][j+7]);
+
+          plane.initPlane(15, 10.0, center);
   }
 }
 
@@ -142,8 +186,16 @@ void updateProcessingProto() {
           /*For example here we are updating our matrix rotation system.*/
           U.updateRotationMats(rotSpeed);
 
+          joker.updateVector3D( 2.0, 0.0, 0.5*cos(rotSpeed));
+          dodeca.updateDodecahedron(cos(rotSpeed), joker);
+
+          joker.updateVector3D(-2.0, 0.0,-0.5*cos(rotSpeed));
+          dodeca0.updateDodecahedron(cos(rotSpeed), joker);
+
           /*We update the vector K in order to create an ocilation efect.*/
-          K.updateVector3D(0.0, 0.0, 2.5 * cos(count));
+          K.updateVector3D(0.0, 0.0, 2.5 * cos(rotSpeed));
+          InA.updateInversion(2.5, K);
+          InB.updateInversion(2.5, K);
 
 
     }
@@ -156,14 +208,61 @@ void Draw() {
 
   if (ciclo > 0) {
     /*Draw Here*/
-    //dodeca.renderDodecahedron(0, U);
     
     //sponge.renderMengerSponge(U, 400);
     //map.renderMatrixMengerList(U, 1000);
-    tela.renderTela(iter1, U);
+    int ModForm = 8;
+    if (pass1 % ModForm == 0) {
+      dodeca.renderDodecahedron2(760, U, pass00);
+      dodeca0.renderDodecahedron2(760, U, pass00);
+      tela.renderTela(iter1, U, ITT, pass1);
+      plane.renderPlane(0, U);
+    }
+    if (pass1 % ModForm == 1) {
+      dodeca.renderDodecahedron2(760, U, pass00);
+    dodeca0.renderDodecahedron2(760, U, pass00);
+      tela1.renderTela(iter1, U, ITT, pass1);
+    }
+    if (pass1 % ModForm == 2) {
+      dodeca.renderDodecahedron2(760, U, pass00);
+    dodeca0.renderDodecahedron2(760, U, pass00);
+      tela2.renderTela(iter1, U, ITT, pass1);
+    }
+    if (pass1 % ModForm == 3) {
+      dodeca.renderDodecahedron2(760, U, pass00);
+    dodeca0.renderDodecahedron2(760, U, pass00);
+      tela3.renderTela(iter1, U, ITT, pass1);
+    }
+    if (pass1 % ModForm == 4) {
+      dodeca.renderDodecahedron2(760, U, pass00);
+    dodeca0.renderDodecahedron2(760, U, pass00);
+      tela4.renderTela(iter1, U, ITT, pass1);
+    }
+    if (pass1 % ModForm == 5) {
+      tela5.renderTela(iter1, U, ITT, pass1);
+      torus.renderTorus(760, U);
+    }
+
+    if (pass1 % ModForm == 6) {
+    
+      tela7.renderTela(iter1, U, ITT, pass1);
+      torus.renderByInversion(InA, InB, U);
+      sphereNet.renderInvMatrixSphere(InA, InB, U);
+    }
+
+    if (pass1 % ModForm == 7) {
+      
+      dodeca.renderDodecahedron2(760, U, pass00%399);
+      sponge.renderMengerSponge(U, pass00);
+
+    }
+
+    //xAxis.renderArrowOpenGL(U, 765);
+    //yAxis.renderArrowOpenGL(U, 765);
     
   }
 }
+
 
 void ProcessingProto() {
 
@@ -293,8 +392,8 @@ void init(double theta)
                                     /* Z near */ 0.5, 
                                     /* Z far */ 10000.0);
   glMatrixMode(GL_MODELVIEW);
-  gluLookAt( 5.0, 5.0, 8.0,      /* eye is at (0,0,5) */
-            -2.5, 2.5, 0.0,      /* center is at (0,0,0) */
+  gluLookAt( 3.01, 3.01, 9.0,      /* eye is at (0,0,5) */
+              0.0, 0.0, 1.0,      /* center is at (0,0,0) */
              0.0, 0.0, 1.0);      /* up is in positive Y direction */
 
   /* Adjust Board position to be asthetic angle. */
@@ -324,6 +423,10 @@ void keyboard(unsigned char key, int x, int y) {
 
     case 'b': 
       pass00 += 1;
+      break;
+
+    case 'B': 
+      pass00 -= 1;
       break;
 
     case 'w': 
@@ -401,7 +504,7 @@ void keyboard(unsigned char key, int x, int y) {
       break;
 
     case 'M':
-      pass2 += 1;
+      pass1 -= 1;
       break;
   }
 

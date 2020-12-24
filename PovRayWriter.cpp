@@ -16,7 +16,7 @@ using namespace std;
 // ================ CLASS CONSTRUCTOR ================== //
 //Class constructor. Initializes the file writer.
 
-POVRayWriter::POVRayWriter(string path)
+void POVRayWriter::initPovRay(string path)
 {
     writer.open(path.c_str());
 
@@ -45,37 +45,6 @@ string POVRayWriter::Clock() {
     return "clock";
 }
 
-//Creates a ini animation file with the specified number of frames, starting
-//at initClock and ending at endClock. The file will be created in the path specified.
-void POVRayWriter::createIniFile(string path, int frames, int initClock, int endClock) {
-
-    iniCreator.open(path.c_str());
-
-    iniCreator << "+W150" << endl;
-    iniCreator << "+H150" << endl;
-    iniCreator << "Input_File_Name = " << path << endl;
-    iniCreator << "Initial_Frame = 0" << endl << "Final_Frame = " << frames << endl;
-    iniCreator << "Initial_Clock = " << initClock << endl << "Final_Clock = " << endClock << endl;
-
-    iniCreator.close();
-    return;
-}
-
-//Create a ini animation file in the path given, with the specified frames.
-//InitClock and endClock will be adjusted to make a relation 1:1 between
-//frames and clocks; this is useful for arrays.
-void POVRayWriter::createIniFile(string path, int frames)
-{
-    iniCreator.open(path.c_str());
-
-    iniCreator << "; INI File Generated with Victor Buendia's POVRayWriter" << endl;
-    iniCreator << "Input_File_Name = " << filePath << endl;
-    iniCreator << "Initial_Frame = 0" << endl << "Final_Frame = " << frames << endl;
-    iniCreator << "Initial_Clock = 0" << endl << "Final_Clock = " << frames << endl;
-
-    iniCreator.close();
-    return;
-}
 
 //Allows the user to write custom content.
 void POVRayWriter::write(string str)
@@ -99,24 +68,7 @@ void POVRayWriter::closePOVRayWriter()
     }
 
     void POVRayWriter::rotClockY() {
-      writer << endl << "rotate <0, -clock*60, 0>" << endl;
-    }
-
-    void POVRayWriter::ultra_wide_camera_Update(double theta, double phii, double radius) {
-        
-          string teta = to_string(theta);
-          string phi = to_string(phii);
-          string rad = to_string(radius);
-          writer << "camera { " << endl;
-          writer << "  ultra_wide_angle " << endl;
-          writer << "  location ";
-          writer << "  <"<< rad <<" * sin("<< teta <<") * cos("<< phi <<"), " << rad << "* cos("<< teta <<"), " << rad << " * sin("<< teta <<") * sin("<< phi <<")> ";
-          writer << endl << "  look_at ";
-          writeVector(2.0, 0.0, 0.0);
-          writer << "  right x*image_width/image_height" << endl;
-          writer << "angle "; writer << 0.4 * 3.1415 << endl;
-          writer << "} " << endl << endl;  
-         
+      writer << endl << "rotate <0, -clock*90, 0>" << endl;
     }
 
     void POVRayWriter::eye(double theta, double phii, double radius) {
@@ -128,10 +80,69 @@ void POVRayWriter::closePOVRayWriter()
           writer << "  location ";
           writer << "  <"<< rad <<" * sin("<< teta <<") * cos("<< phi <<"), " << rad << "* cos("<< teta <<"), " << rad << " * sin("<< teta <<") * sin("<< phi <<")> ";
           writer << endl << "  look_at ";
-          writeVector(0.0, 1.8, 2.5);
+          writeVector(0.0, 0.0, 0.0);
           writer << "angle "; writer << 0.4 * 3.1415 << endl;
           writer << "} " << endl << endl;  
          
+    }
+
+    void POVRayWriter::TILEFLOOR() {
+        writer << "polygon {" << endl;
+              writer << "3" << endl;
+              writer << "<20, -2, 20>   <-20, -2, 20>   <-20, -2, -20>   pigment { " << endl;
+                writer << "checker" << endl;
+                writer << "pigment {granite color_map { [0 rgb 1][1 rgb .9] }}  " << endl;
+                writer << "pigment {granite color_map { [0 rgb .5][1 rgb .5] }}" << endl;
+                writer << "}" << endl;
+              
+                writer << "#declare TileNormal =" << endl;
+                writer << "  normal" << endl;
+                writer << "  { gradient x 2 // Double the strength because of the averaging " << endl;
+                writer << "    slope_map" << endl;
+                writer << "    { [0 <0, 1>] // 0 height, strong slope up" << endl;
+                writer << "      [.1 <1, 0>] // maximum height, horizontal" << endl;
+                writer << "      [.95 <1, 0>] // maximum height, horizontal" << endl;
+                writer << "      [1 <0, -1>] // 0 height, strong slope down" << endl;
+                writer << "    }" << endl;
+                writer << "  }" << endl;
+                writer << "normal" << endl;
+                writer << "{ average normal_map" << endl;
+                writer << "  { [1 TileNormal]" << endl;
+                writer << "    [1 TileNormal rotate y*90]" << endl;
+                writer << "  }" << endl;
+                writer << "}" << endl;
+              
+              writer << "}" << endl;
+              
+            writer << "  polygon {" << endl;
+            writer << "  3" << endl;
+            writer << "  <-20, -2, -20>   <20, -2, -20>   <20, -2, 20>   " << endl;
+            writer << "  " << endl;
+            writer << "  pigment {" << endl; 
+            writer << "    checker" << endl;
+            writer << "    pigment {granite color_map { [0 rgb 1][1 rgb .9] }}" << endl;
+            writer << "    pigment {granite color_map { [0 rgb .5][1 rgb .5] }}" << endl;
+            writer << "  }" << endl;
+            writer << "  " << endl;
+            writer << "    #declare TileNormal =" << endl;
+            writer << "      normal" << endl;
+            writer << "      { gradient x 2 // Double the strength because of the averaging" << endl;
+            writer << "        slope_map" << endl;
+            writer << "        { [0 <0, 1>] // 0 height, strong slope up" << endl;
+            writer << "          [.1 <1, 0>] // maximum height, horizontal" << endl;
+            writer << "          [.95 <1, 0>] // maximum height, horizontal" << endl;
+            writer << "          [1 <0, -1>] // 0 height, strong slope down" << endl;
+            writer << "        }" << endl;
+            writer << "      }" << endl;
+            writer << "    normal" << endl;
+            writer << "    { average normal_map" << endl;
+            writer << "      { [1 TileNormal]" << endl;
+            writer << "        [1 TileNormal rotate y*90]" << endl;
+            writer << "      }" << endl;
+            writer << "    }" << endl;
+            writer << "  " << endl;
+            writer << "  }" << endl;
+        return;
     }
 
     void POVRayWriter::createLight(VectorND position) {
@@ -162,7 +173,7 @@ void POVRayWriter::closePOVRayWriter()
         if (mod%13 == 11) Paint0(4);
         if (mod%13 == 12) Paint0(5);
         
-        //rotClockY();
+  rotClockY();
         writer << "}" << endl << endl;
     }
 
@@ -186,7 +197,7 @@ void POVRayWriter::closePOVRayWriter()
         if (mod%13 == 11) Paint0(4);
         if (mod%13 == 12) Paint0(5);
 
-          //rotClockY();
+      rotClockY();
           writer << "}" << endl << endl;
         }
           
@@ -196,28 +207,36 @@ void POVRayWriter::closePOVRayWriter()
 
         writer << "polygon {" << endl;
         writer << 3 << endl;
+
+        U.rot3D(facet.pointA());
+        writeVector(U.getAux().access(0), U.getAux().access(1), U.getAux().access(2));
+        U.rot3D(facet.pointB());
+        writeVector(U.getAux().access(0), U.getAux().access(1), U.getAux().access(2));
+        U.rot3D(facet.pointC());
+        writeVector(U.getAux().access(0), U.getAux().access(1), U.getAux().access(2));
+
+        //writeVector(facet.pointA().access(0), facet.pointA().access(1), facet.pointA().access(2));
+        //writeVector(facet.pointB().access(0), facet.pointB().access(1), facet.pointB().access(2));
+        //writeVector(facet.pointC().access(0), facet.pointC().access(1), facet.pointC().access(2));
     
-        writeVector(facet.pointA().access(0), facet.pointA().access(1), facet.pointA().access(2));
-        writeVector(facet.pointB().access(0), facet.pointB().access(1), facet.pointB().access(2));
-        writeVector(facet.pointC().access(0), facet.pointC().access(1), facet.pointC().access(2));
-    
-        if (mod%15 == 0) mirrorTexture();
-        if (mod%15 == 1) glassTexture1();
-        if (mod%15 == 2) glassTexture2();
-        if (mod%15 == 3) glassTexture3();
-        if (mod%15 == 4) marbleTexture1();
-        if (mod%15 == 5) T_Gold_1A();
-        if (mod%15 == 6) T_Chrome_5A();
-        if (mod%15 == 7) Paint0(0);
-        if (mod%15 == 8) Paint0(1);
-        if (mod%15 == 9) Paint0(2);
-        if (mod%15 == 10) Paint0(3);
-        if (mod%15 == 11) Paint0(4);
-        if (mod%15 == 12) Paint0(5);
-        if (mod%15 == 13) Paint0(6);
-        if (mod%15 == 14) Paint0(6);
+        if (mod%16 == 0) mirrorTexture();
+        if (mod%16 == 1) glassTexture1();
+        if (mod%16 == 2) glassTexture2();
+        if (mod%16 == 3) glassTexture3();
+        if (mod%16 == 4) marbleTexture1();
+        if (mod%16 == 5) T_Gold_1A();
+        if (mod%16 == 6) T_Chrome_5A();
+        if (mod%16 == 7) Paint0(0);
+        if (mod%16 == 8) Paint0(1);
+        if (mod%16 == 9) Paint0(2);
+        if (mod%16 == 10) Paint0(3);
+        if (mod%16 == 11) Paint0(4);
+        if (mod%16 == 12) Paint0(5);
+        if (mod%16 == 13) Paint0(6);
+        if (mod%16 == 14) Paint0(7);
+        if (mod%16 == 15) Paint0(8);
       
-        //rotClockY();
+      rotClockY();
         writer << "}" << endl << endl;
 
         //cylinder(facet.pointA(), facet.pointB(), 0.005);
@@ -227,8 +246,63 @@ void POVRayWriter::closePOVRayWriter()
 
     void POVRayWriter::renderSquare(Square square, RotationMats U, int n) {
 
+      //renderFacetPOVRay(square.mesh.getFacet(0, 0), n, U);
+      //renderFacetPOVRay(square.mesh.getFacet(0, 1), n, U);
+      writer << "   mesh {" << endl;
+      writer << "     triangle {" << endl;
+      writeVectorP(square.mesh.getFacet(0, 0).pointA());
+      writeVectorP(square.mesh.getFacet(0, 0).pointB());
+      writeVectorP(square.mesh.getFacet(0, 0).pointC()); writer << " " << endl;
+      writer << "   uv_vectors <0,0>, <1,0>, <1,1>" << endl;
+      writer << "  }" << endl;
+      writer << "     triangle {" << endl;
+
+      writeVectorP(square.mesh.getFacet(0, 1).pointA());
+      writeVectorP(square.mesh.getFacet(0, 1).pointB());
+      writeVectorP(square.mesh.getFacet(0, 1).pointC()); writer << " " << endl;
+      writer << "   uv_vectors <1,1>, <0,1>, <0,0>" << endl;
+      writer << "  }" << endl << endl;
+
+      writer << "  texture {" << endl;
+      writer << "   uv_mapping" << endl;
+      writer << "   pigment {" << endl;
+      writer << "     image_map {" << endl;
+      writer << "     \"red_terminus.png\" " << endl;
+      writer << "     once" << endl;
+      writer << "     map_type 0" << endl;
+      writer << "     interpolate 2" << endl;
+      writer << "     }}}}" << endl;
+
+    }
+
+    void POVRayWriter::renderSquare2(Square square, RotationMats U, int n) {
+
       renderFacetPOVRay(square.mesh.getFacet(0, 0), n, U);
-      renderFacetPOVRay(square.mesh.getFacet(0, 1), n, U); 
+      renderFacetPOVRay(square.mesh.getFacet(0, 1), n, U);
+      
+    }
+
+    void POVRayWriter::renderTorus(Torus torus, RotationMats U, int n) {
+
+      for (int i = 0; i < torus.mesh.m; i++)
+        for (int j = 0; j < torus.mesh.n; j++)
+          renderSquare(torus.mesh.A[i][j], U, n);
+    }
+
+    void POVRayWriter::renderTela(Tela tela, RotationMats U, int n, int auxI) {
+
+      for (int i = 1; i < tela.mesh.m-2; i++)
+        for (int j = 1; j < tela.mesh.n/2; j++)
+          //if (tela.cool.A[i][j] < 760 ||
+          //    tela.cool.A[i-1][j-1] < 760 ||
+          //    tela.cool.A[i-1][j] < 760 ||
+          //    tela.cool.A[i][j-1] < 760 ||
+          //    tela.cool.A[i+1][j] < 760 ||
+          //    tela.cool.A[i][j+1] < 760 ||
+          //    tela.cool.A[i+1][j+1] < 760 ||
+          //    tela.cool.A[i-1][j+1] < 760 ||
+          //    tela.cool.A[i+1][j-1] < 760)
+          renderSquare2(tela.mesh.A[i][j], U, n);
     }
 
     void POVRayWriter::renderCubeNeighborhood(CubeNeighborhood cube, RotationMats U) {
@@ -265,11 +339,12 @@ void POVRayWriter::closePOVRayWriter()
 
       double width = 0.05 * dodeca.getArista(0, 0).getLength();
       for (int i = 0; i < 30; i++)
-        cylinder(dodeca.getArista(0, i).getHead(), dodeca.getArista(0, i).getTail(), width, 7);
+        cylinder(dodeca.getArista(0, i).getHead(), dodeca.getArista(0, i).getTail(), width, 5);
 
-      //for (int i = 0; i < 12; i++)
-      //  for (int j = 0; j < 3*6*6; j++)
-      //    renderFacetPOVRay(dodeca.getMesh(2).getFacet(i, j), 5, U);
+      for (int i = 0; i < 12; i++)
+        for (int j = 0; j < 3; j++) {
+          renderFacetPOVRay(dodeca.mesh.getFacet(i, j), 6, U);
+        }
     }
 
     void POVRayWriter::renderLattice2D(Lattice2D lattice2D, RotationMats U) {
@@ -318,7 +393,7 @@ void POVRayWriter::closePOVRayWriter()
     void POVRayWriter::renderArrow(Arrow arrow, RotationMats U, int mod) {
 
       for (int j = 0; j < arrow.n; j++) {
-        for (int i = 0; i < arrow.m*2; i++)
+        //for (int i = 0; i < arrow.m*2; i++)
         renderFacetPOVRay(arrow.mesh.getFacet(0, j), mod, U);
         renderFacetPOVRay(arrow.mesh.getFacet(1, j), mod, U);
         renderFacetPOVRay(arrow.mesh.getFacet(2, j), mod, U);
@@ -327,6 +402,7 @@ void POVRayWriter::closePOVRayWriter()
         renderFacetPOVRay(arrow.mesh.getFacet(5, j), mod, U);
       }
     }
+
 
 
     void POVRayWriter::renderAnt(Ant ant, RotationMats U, int mod) {
@@ -554,6 +630,19 @@ void POVRayWriter::Paint0(int n) {
   writer << "}" << endl;
   }
 
+  if (n == 8) {
+    writer << "pigment { Red }" << endl;
+    writer << "finish {" << endl;
+  writer << "   ambient .1" << endl;
+  writer << "   diffuse .1" << endl;
+  writer << "   specular 1" << endl;
+  writer << "   roughness .01" << endl;
+  writer << "   reflection {" << endl;
+  writer << "   0.3" << endl;
+  writer << "   }" << endl;
+  writer << "}" << endl;
+  }
+
 }
 
 // ===================== ARRAYS AND ROTATIONS=========================== //
@@ -563,6 +652,11 @@ void POVRayWriter::Paint0(int n) {
 //Writes the vector indicated in the file
 void POVRayWriter::writeVector(double x, double y, double z) {
     writer << "<" << x << ", " << y << ", " << z << ">   ";
+    return;
+}
+
+void POVRayWriter::writeVectorP(VectorND v) {
+    writer << "<" << v.access(0) << ", " << v.access(1) << ", " << v.access(2) << ">   ";
     return;
 }
 
@@ -594,6 +688,6 @@ void POVRayWriter::text(string tex, double size, VectorND position, double angle
   writer << "           }" << endl;
   writer << "         }" << endl;
 
-  //rotClockY();
+  rotClockY();
   writer << "}" << endl;
 }

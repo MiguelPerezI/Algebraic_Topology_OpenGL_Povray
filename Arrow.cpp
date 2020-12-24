@@ -302,6 +302,18 @@ void Arrow::reflectArista() {
 	}
 }
 
+void Arrow::renderArrowOpenGL(RotationMats U, int mod) {
+
+      for (int j = 0; j < this->n; j++) {
+        this->mesh.getFacet(0, j).renderFacetOpenGL(mod, U);
+        this->mesh.getFacet(1, j).renderFacetOpenGL(mod, U);
+        this->mesh.getFacet(2, j).renderFacetOpenGL(mod, U);
+        this->mesh.getFacet(3, j).renderFacetOpenGL(mod, U);
+        this->mesh.getFacet(4, j).renderFacetOpenGL(mod, U);
+        this->mesh.getFacet(5, j).renderFacetOpenGL(mod, U);
+    }
+}
+
 void Arrow::aristaSet(VectorND a, VectorND b, double width) {
 
 	this->help.initVectorND(3);

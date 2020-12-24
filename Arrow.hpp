@@ -50,6 +50,7 @@ class Arrow {
 		void aristaSetUdate(VectorND, VectorND, double);
 		void reflectArista();
 		void initTransfom(VectorND);
+		void renderArrowOpenGL(RotationMats U, int mod);
 };
 
 class MatrixArrow {

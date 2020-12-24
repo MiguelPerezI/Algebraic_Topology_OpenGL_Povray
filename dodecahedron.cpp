@@ -261,6 +261,15 @@ void Dodecahedron::renderDodecahedron(int color, RotationMats U) {
 		}
 }
 
+void Dodecahedron::renderDodecahedron2(int color, RotationMats U, int build) {
+
+    if (build < 0) build *= -1;
+    for (int i = 0; i < 12; i++)
+        for (int j = 0; j < 3; j++) {
+            this->mesh.getFacet(i, j).renderFacetOpenGL(color, U);
+        }
+}
+
 MatrixFacet Dodecahedron::getMesh(int i) {
 	return this->complex.getMatrixFacet(i);
 }

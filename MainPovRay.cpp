@@ -10,6 +10,7 @@
 #include "Arrow.hpp"
 #include <string>
 #include "simplex.hpp"
+#include "Tela.hpp"
 
 using namespace std;
 
@@ -21,29 +22,41 @@ double radius = 0.25;
 double theta;
 double phi;
 double R, newR;
+int red = 7;
+int green = 8;
+int blue = 9;
+int white = 11;
+int black = 12;
+int yellow = 13;
+int orange = 14;
+int count = 0;
 
 /*Rotation Matrix System*/
-RotationMats U;
+RotationMats U, V, W;
 
 /*Arrow*/
 Arrow flecha, flecha0, flecha1, flecha2;
 
-/*Ant*/
-Ant ant;
-MatrixAnt antPile;
-
-double partition = 1;
+/*Intro*/
+Arrow baseI, baseJ, baseK;
+ArrowTransform sbaseI, sbaseJ, sbaseK;
 
 /*floor*/
 Square fl, fl0, fl1, fl2, fl3, fl4;
 VectorND floor0, floor1, floor2, floor3;
 
 /*Cortina*/
+Dodecahedron dodeca;
 Cortina cortina;
+
+/*Torus*/
+Torus TT;
+
+Tela tela;
 
 void setup() {
 
-	printf("\n\n<<<<<<<<<<<<>>>>> Terminus POV-Ray <<<<<>>>>>>>>>>>>>\n\n                  ---> Memory Setup ---> \n\n");
+  printf("\n\n<<<<<<<<<<<<>>>>> Terminus POV-Ray <<<<<>>>>>>>>>>>>>\n\n                  ---> Memory Setup ---> \n\n");
 
           ///////////////////
           /*  Base for R3  */
@@ -70,7 +83,7 @@ void setup() {
           ///////////////////
           /*Light position*/
           ///////////////////
-          lightPosition.initVectorND(3,-4.0, 6.0, 3.0);
+          lightPosition.initVectorND(3, 0.0, 5.0, 0.0);
 
           
           joker.initVectorND(3, 2.0, 0.0, 0.0);
@@ -92,6 +105,8 @@ void setup() {
           /*Rotation Matrix*/
           ///////////////////
           U.initRotationMats(0.0);
+          V.initRotationMatsY(0.0);
+          W.initRotationMatsY(0.0);
 
           ///////////////////
           /*Geometry       */
@@ -105,395 +120,84 @@ void setup() {
           ground.initFacet(a0, b0, c0);
 
 
-          joker.updateVector3D(0.0, 2.0, 0.0);
-          joker0.updateVector3D(1.0, 0.0, 1.0);
-          //ant.antSet(joker, joker0, 0.3, 0.0*PI, 0.0*PI, ground, 0);
-          antPile.initMatrixAnt(1, 77 + 25 + 49 + 25 + 42);
-          cortina.initCortina(100, 0.1);
-          printf("-->Curve animation setup succesful\n");
-
-
           ////////////////////
-          /*Vector Animation*/
+          /*Base for R3*/
           ////////////////////
-          int count = 0;
-          double teta1 = 0;
-          double teta2 = 0;
-          double move = 1.5;
-          double move0 = 0.0;
-          double step = 0.025;
-
-          while (count < 77) {
-
-            if (count < 25)
-              antPile.initA(0, count, 
-              midPoint(cortina.base.curve.getArista(0, count).getTail(), cortina.head.curve.getArista(0, count).getTail()), 
-              midPoint(cortina.base.curve.getArista(0, count).getHead(), cortina.head.curve.getArista(0, count).getHead()), 
-              0.3, 
-              0.65*teta1, 
-              3.0*teta1,
-              cortina.tela.getFacet(0, count), 1, 0.0);
-
-            if (25 <= count && count < 50)
-              antPile.initA(0, count, 
-              midPoint(cortina.base.curve.getArista(0, count).getTail(), cortina.head.curve.getArista(0, count).getTail()), 
-              midPoint(cortina.base.curve.getArista(0, count).getHead(), cortina.head.curve.getArista(0, count).getHead()),
-              0.3, 
-              0.65*teta1, 
-              3.0*teta1,
-              cortina.tela.getFacet(0, count), 0, 0.0);
-
-            if (50 <= count && count < 75)
-              antPile.initA(0, count, 
-              midPoint(cortina.base.curve.getArista(0, count).getTail(), cortina.head.curve.getArista(0, count).getTail()), 
-              midPoint(cortina.base.curve.getArista(0, count).getHead(), cortina.head.curve.getArista(0, count).getHead()),
-              0.3, 
-              0.65*teta1, 
-              3.0*teta1,
-              cortina.tela.getFacet(0, count), 0, 0.0);
-
-            if (75 <= count && count < 100)
-              antPile.initA(0, count, 
-              midPoint(cortina.base.curve.getArista(0, count).getTail(), cortina.head.curve.getArista(0, count).getTail()), 
-              midPoint(cortina.base.curve.getArista(0, count).getHead(), cortina.head.curve.getArista(0, count).getHead()),
-              0.3, 
-              0.65*teta1, 
-              3.0*teta1,
-              cortina.tela.getFacet(0, count), 1, 0.0);
-
-            if (count < 10) teta1 += step;
-            if (10 <= count && count < 20) teta1 -= step;
-            if (20 <= count && count < 30) teta1 -= step;
-            if (30 <= count && count < 40) teta1 += step;
-            if (40 <= count && count < 50) teta1 += step;
-            if (50 <= count && count < 60) teta1 -= step;
-            if (60 <= count && count < 70) teta1 -= step;
-            if (70 <= count && count < 80) teta1 += step;
-            if (80 <= count && count < 90) teta1 += step;
-            if (90 <= count && count < 100) teta1 -= step;
-            count += 1;
-          }
-
-          int i0m = count;
-          int i0n = 0;
-          while (i0m < count + 25) {
-
-            antPile.initA(0, i0m, 
-              midPoint(cortina.base.curve.getArista(0, count).getTail(), cortina.head.curve.getArista(0, count).getTail()), 
-              midPoint(cortina.base.curve.getArista(0, count).getHead(), cortina.head.curve.getArista(0, count).getHead()),
-              0.3, 
-              0.65*teta1, 
-              2.0*teta1,
-              cortina.tela.getFacet(0, count), 1, -0.04 * (double)i0n);
-
-            i0m += 1;
-            i0n += 1;
-          }
-
-          while (28 < count) {
-
-            if (75 <= count && count < 100)
-              antPile.initA(0, i0m, 
-              midPoint(cortina.base.curve.getArista(0, count).getTail(), cortina.head.curve.getArista(0, count).getTail()), 
-              midPoint(cortina.base.curve.getArista(0, count).getHead(), cortina.head.curve.getArista(0, count).getHead()),
-              0.3, 
-              0.65*teta1, 
-              3.0*teta1,
-              cortina.tela.getFacet(0, count), 1,-0.04*25.0);
-
-
-            if (50 <= count && count < 75)
-              antPile.initA(0, i0m, 
-              midPoint(cortina.base.curve.getArista(0, count).getTail(), cortina.head.curve.getArista(0, count).getTail()), 
-              midPoint(cortina.base.curve.getArista(0, count).getHead(), cortina.head.curve.getArista(0, count).getHead()),
-              0.3, 
-              0.65*teta1, 
-              3.0*teta1,
-              cortina.tela.getFacet(0, count), 0,-0.04*25.0);
-
-            if (25 <= count && count < 50)
-              antPile.initA(0, i0m, 
-              midPoint(cortina.base.curve.getArista(0, count).getTail(), cortina.head.curve.getArista(0, count).getTail()), 
-              midPoint(cortina.base.curve.getArista(0, count).getHead(), cortina.head.curve.getArista(0, count).getHead()),
-              0.3, 
-              0.65*teta1, 
-              3.0*teta1,
-              cortina.tela.getFacet(0, count), 0,-0.04*25.0);
-
-            if (count < 10) teta1 += step;
-            if (10 <= count && count < 20) teta1 -= step;
-            if (20 <= count && count < 30) teta1 -= step;
-            if (30 <= count && count < 40) teta1 += step;
-            if (40 <= count && count < 50) teta1 += step;
-            if (50 <= count && count < 60) teta1 -= step;
-            if (60 <= count && count < 70) teta1 -= step;
-            if (70 <= count && count < 80) teta1 += step;
-            if (80 <= count && count < 90) teta1 += step;
-            if (90 <= count && count < 100) teta1 -= step;
-            count -= 1;
-            i0m += 1;
-          }
-
-          int i1m = i0m;
-          i0n = 0;
-          while (i1m < i0m + 25) {
-
-            antPile.initA(0, i1m, 
-              midPoint(cortina.base.curve.getArista(0, count).getTail(), cortina.head.curve.getArista(0, count).getTail()), 
-              midPoint(cortina.base.curve.getArista(0, count).getHead(), cortina.head.curve.getArista(0, count).getHead()),
-              0.3, 
-              0.65*teta1, 
-              2.0*teta1,
-              cortina.tela.getFacet(0, count), 0, (-0.04 * 25.0) + (-0.04*(double)i0n));
-
-            i1m += 1;
-            i0n += 1;
-          }
-
-
-
-
-
-          while (count < 70) {
-
-//            if (75 <= count && count < 100)
-//              antPile.initA(0, i0m, 
-//              midPoint(cortina.base.curve.getArista(0, count).getTail(), cortina.head.curve.getArista(0, count).getTail()), 
-//              midPoint(cortina.base.curve.getArista(0, count).getHead(), cortina.head.curve.getArista(0, count).getHead()),
-//              0.3, 
-//              0.65*teta1, 
-//              3.0*teta1,
-//              cortina.tela.getFacet(0, count), 1, 0.0);
-
-
-            if (50 <= count && count < 75)
-              antPile.initA(0, i1m, 
-              midPoint(cortina.base.curve.getArista(0, count).getTail(), cortina.head.curve.getArista(0, count).getTail()), 
-              midPoint(cortina.base.curve.getArista(0, count).getHead(), cortina.head.curve.getArista(0, count).getHead()),
-              0.3, 
-              0.65*teta1, 
-              3.0*teta1,
-              cortina.tela.getFacet(0, count), 0, 0.0);
-
-            if (25 <= count && count < 50)
-              antPile.initA(0, i1m, 
-              midPoint(cortina.base.curve.getArista(0, count).getTail(), cortina.head.curve.getArista(0, count).getTail()), 
-              midPoint(cortina.base.curve.getArista(0, count).getHead(), cortina.head.curve.getArista(0, count).getHead()),
-              0.3, 
-              0.65*teta1, 
-              3.0*teta1,
-              cortina.tela.getFacet(0, count), 0, 0.0);
-
-            if (count < 10) teta1 += step;
-            if (10 <= count && count < 20) teta1 -= step;
-            if (20 <= count && count < 30) teta1 -= step;
-            if (30 <= count && count < 40) teta1 += step;
-            if (40 <= count && count < 50) teta1 += step;
-            if (50 <= count && count < 60) teta1 -= step;
-            if (60 <= count && count < 70) teta1 -= step;
-            if (70 <= count && count < 80) teta1 += step;
-            if (80 <= count && count < 90) teta1 += step;
-            if (90 <= count && count < 100) teta1 -= step;
-            count += 1;
-            i1m += 1;
-          }
-
-
-
-
-
-
-          printf("-->Animation setup succesful\n");
-
-          joker.updateVector3D(0.0, 3.0, 0.0);
-          joker0.updateVector3D(0.0,-3.0, 0.0);
+          joker.updateVector3D(0.0, 1.0, 0.0);
+          joker0.updateVector3D(0.0, 0.0, 0.0);
           flecha0.aristaSet(joker, joker0, 0.1);
-          joker.updateVector3D(3.0, 0.0, 0.0);
-          joker0.updateVector3D(-3.0, 0.0, 0.0);
+          joker.updateVector3D(1.0, 0.0, 0.0);
           flecha1.aristaSet(joker, joker0, 0.1);
-          joker.updateVector3D(0.0, 0.0, 3.0);
-          joker0.updateVector3D(0.0, 0.0,-3.0);
+          joker.updateVector3D(0.0, 0.0, 1.0);
           flecha2.aristaSet(joker, joker0, 0.1);
 
-          //cortina.moveCortina();
+          //TT.initTorus(5, 2.0, 1.0, center);
+          tela.initTela("Go");
+          joker.updateVector3D(0.0, 0.0,-3.5);
+          dodeca.initDodecahedron(1, joker);
+          //dodeca.initSmooth(2);
+
 }
 
 int main(void)
-{	
-  	setup();
-  	POVRayWriter pov("topology.pov");
+{ 
+    setup();
 
-    pov.eye(0.35 * PI, 1.25 * PI, 250);
-
-    pov.renderSquare(fl, U, 10);        //floor
-  	pov.createLight(lightPosition);
-    pov.renderArrow(flecha0, U, 6);     //Y-axis
-    pov.renderArrow(flecha1, U, 6);     //X-axis
-    pov.renderArrow(flecha2, U, 6);     //Z-axis
+    //Xstring title;
+    //title = "topology";
+    //title += to_string(0);
+    //title += ".pov";
     
-    string str, strAux0, strAux1, strAux2, strAux3;
+//    //POVRayWriter pov(title);
+//    POVRayWriter pov;
+//    pov.initPovRay(title);
+//    pov.TILEFLOOR();
+//   // pov.renderSquare(fl, U, 10);        //floor
+//    pov.createLight(lightPosition);
+//    //pov.renderArrow(flecha0, U, 6);     //Y-axis
+//    //pov.renderArrow(flecha1, U, 6);     //X-axis
+//    //pov.renderArrow(flecha2, U, 6);     //Z-axis
+//    pov.eye(0.01 * PI, 0.0 * PI, 550);
+//    //pov.renderTorus(TT, U, 0);
+//    pov.renderTela(tela, U, 5);
+//    pov.renderDodecahedron(dodeca, U);
+//    pov.closePOVRayWriter();
 
-    //pov.renderAnt(ant, U, 6);
-    //pov.renderSpaceCurve(cortina.base, U, 7);
-//    pov.renderSpaceCurve(cortina.head, U, 7);
-
-    for (int i = 0; i < 2*100; i++)
-      pov.renderFacetPOVRay(cortina.tela.getFacet(0, i), 6, U);
-
-    joker.updateVector3D(
-      cortina.base.curve.getArista(0, 0).getHead().access(0),
-      cortina.base.curve.getArista(0, 0).getHead().access(1) + 0.25,
-      cortina.base.curve.getArista(0, 0).getHead().access(2));
-
-    pov.text("-13", 0.2, joker, 90, "Red");
-
-    joker.updateVector3D(
-      cortina.base.curve.getArista(0, 7).getHead().access(0),
-      cortina.base.curve.getArista(0, 7).getHead().access(1) + 0.17,
-      cortina.base.curve.getArista(0, 7).getHead().access(2));
-
-    pov.text("-12", 0.2, joker, 90, "Red");
-
-    joker.updateVector3D(
-      cortina.base.curve.getArista(0, 14).getHead().access(0),
-      cortina.base.curve.getArista(0, 14).getHead().access(1) + 0.17,
-      cortina.base.curve.getArista(0, 14).getHead().access(2));
-
-    pov.text("-11", 0.2, joker, 90, "Red");
-
-    joker.updateVector3D(
-      cortina.base.curve.getArista(0, 21).getHead().access(0),
-      cortina.base.curve.getArista(0, 21).getHead().access(1) + 0.17,
-      cortina.base.curve.getArista(0, 21).getHead().access(2));
-
-    pov.text("-10", 0.2, joker, 90, "Red");
-
-    joker.updateVector3D(
-      cortina.base.curve.getArista(0, 28).getHead().access(0),
-      cortina.base.curve.getArista(0, 28).getHead().access(1) + 0.17,
-      cortina.base.curve.getArista(0, 28).getHead().access(2));
-
-    pov.text("-9", 0.2, joker, 90, "Red");
-
-    joker.updateVector3D(
-      cortina.base.curve.getArista(0, 35).getHead().access(0),
-      cortina.base.curve.getArista(0, 35).getHead().access(1) + 0.17,
-      cortina.base.curve.getArista(0, 35).getHead().access(2));
-
-    pov.text("-8", 0.2, joker, 90, "Red");
-
-    joker.updateVector3D(
-      cortina.base.curve.getArista(0, 42).getHead().access(0),
-      cortina.base.curve.getArista(0, 42).getHead().access(1) + 0.17,
-      cortina.base.curve.getArista(0, 42).getHead().access(2));
-
-    pov.text("-7", 0.2, joker, 90, "Red");
-
-    joker.updateVector3D(
-      cortina.base.curve.getArista(0, 49).getHead().access(0),
-      cortina.base.curve.getArista(0, 49).getHead().access(1) + 0.17,
-      cortina.base.curve.getArista(0, 49).getHead().access(2));
-
-    pov.text("-6", 0.2, joker, 90, "Red");
-
-    joker.updateVector3D(
-      cortina.base.curve.getArista(0, 56).getHead().access(0),
-      cortina.base.curve.getArista(0, 56).getHead().access(1) + 0.17,
-      cortina.base.curve.getArista(0, 56).getHead().access(2));
-
-    pov.text("-5", 0.2, joker, 90, "Red");
-
-    joker.updateVector3D(
-      cortina.base.curve.getArista(0, 63).getHead().access(0),
-      cortina.base.curve.getArista(0, 63).getHead().access(1) + 0.17,
-      cortina.base.curve.getArista(0, 63).getHead().access(2));
-
-    pov.text("-4", 0.2, joker, 90, "Red");
-
-    joker.updateVector3D(
-      cortina.base.curve.getArista(0, 70).getHead().access(0),
-      cortina.base.curve.getArista(0, 70).getHead().access(1) + 0.17,
-      cortina.base.curve.getArista(0, 70).getHead().access(2));
-
-    pov.text("-3", 0.2, joker, 90, "Red");
-
-    joker.updateVector3D(
-      cortina.base.curve.getArista(0, 77).getHead().access(0),
-      cortina.base.curve.getArista(0, 77).getHead().access(1) + 0.17,
-      cortina.base.curve.getArista(0, 77).getHead().access(2));
-
-    pov.text("-2", 0.2, joker, 90, "Red");
-
-    joker.updateVector3D(
-      cortina.base.curve.getArista(0, 84).getHead().access(0),
-      cortina.base.curve.getArista(0, 84).getHead().access(1) + 0.17,
-      cortina.base.curve.getArista(0, 84).getHead().access(2));
-
-    pov.text("-1", 0.2, joker, 90, "Red");
-
-    joker.updateVector3D(
-      cortina.base.curve.getArista(0, 91).getHead().access(0),
-      cortina.base.curve.getArista(0, 91).getHead().access(1) + 0.17,
-      cortina.base.curve.getArista(0, 91).getHead().access(2));
-
-    pov.text("0", 0.2, joker, 90, "Red");
-
-    for (int i = 0; i < 102; i++) {
-        str = "   #if ((";
-        strAux0 = to_string(i);
-        strAux1 = "*0.003267941) + 0*0.33333 <= clock & clock <= (";
-        strAux2 = to_string(i+1);
-        strAux3 = "*0.003267941) + 0*0.33333)";
-  
-        str += strAux0;
-        str += strAux1;
-        str += strAux2;
-        str += strAux3;
-  
-        pov.writer << str << endl;
-        //pov.renderMatrixArista(cortina.base.curveList.A[i], U, 0.05, 7);
-        pov.renderAnt(antPile.A[0][i], U, 6);
-        pov.writer << "   #end" << endl;
-      }
+    int count = 0;
+    double rotSpeed = 0.0;
+    double rotSpeedY = 0.0;
+    double rotSpeedW = 0.0;
+    int aux = 2;
+    while (count < 1) {
+      string title;
+      title = "topologyTerminus0";
+      title += to_string(count);
+      title += ".pov";
+      U.updateRotationMats(rotSpeed);
+      POVRayWriter pov;
+      pov.initPovRay(title);
+      pov.TILEFLOOR();
+      pov.createLight(lightPosition);
+      //pov.renderArrow(flecha0, U, 6);     //Y-axis
+      //pov.renderArrow(flecha1, U, 6);     //X-axis
+      //pov.renderArrow(flecha2, U, 6);     //Z-axis
+      pov.eye(0.01 * PI, 0.0 * PI, 550);
+      pov.renderTela(tela, V, 5, aux);
+      rotSpeed += 0.015;
+      pov.renderDodecahedron(dodeca, U);
+      pov.closePOVRayWriter();
+      count += 1;
+      cout << "\n --> i = " << count;
+      rotSpeedW += 0.05;
+      aux += 2;
+    }
 
 
-      for (int i = 0; i < 49 + 25; i++) {
-        str = "   #if ((";
-        strAux0 = to_string(i);
-        strAux1 = "*0.0045) + 1*0.33333 <= clock & clock <= (";
-        strAux2 = to_string(i+1);
-        strAux3 = "*0.0045) + 1*0.33333)";
-  
-        str += strAux0;
-        str += strAux1;
-        str += strAux2;
-        str += strAux3;
-  
-        pov.writer << str << endl;
-        //pov.text("v", 0.7, joker, 0.0, "White");
-        pov.renderAnt(antPile.A[0][102 + i], U, 6);
-        pov.writer << "   #end" << endl;
-      }
-
-      for (int i = 0; i < 42; i++) {
-        str = "   #if ((";
-        strAux0 = to_string(i);
-        strAux1 = "*0.007936429) + 2*0.33333 <= clock & clock <= (";
-        strAux2 = to_string(i+1);
-        strAux3 = "*0.007936429) + 2*0.33333)";
-  
-        str += strAux0;
-        str += strAux1;
-        str += strAux2;
-        str += strAux3;
-  
-        pov.writer << str << endl;
-        //pov.text("v", 0.7, joker, 0.0, "White");
-        pov.renderAnt(antPile.A[0][176 + i], U, 6);
-        pov.writer << "   #end" << endl;
-      }
-
-
-    pov.closePOVRayWriter();
-  	cout << "\n\n\n";
 }
+
+/*
+for x in topology*.pov; do echo $x ; done
+ffmpeg -r 36 -f image2 -s 500x500 -i topology%03d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p test.mp4
+*/
+
+/*g++ Arrow.cpp ant.cpp dodecahedron.cpp geometry.cpp MainPovRay.cpp matrix.cpp PovRayWriter.cpp simplex.cpp Turtle.cpp VectorND.cpp -lm -lGL -lGLU -lglut*/

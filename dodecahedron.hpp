@@ -17,16 +17,18 @@ class Dodecahedron {
         int n;
         double radius, gold, g1, g2;
         VectorND center;
-        MatrixFacet mesh;
+        
         MatrixArista arista;
         CrackFacet aux;
         Inversion inversion;
         
     public:
+        MatrixFacet mesh;
         VectorND vertex[20];
         MatrixFacetList complex;
         void initDodecahedron(double, VectorND);
         void renderDodecahedron(int, RotationMats);
+        void renderDodecahedron2(int color, RotationMats U, int build);
         void initSmooth(int);
         MatrixFacet getMesh(int);
         Arista getArista(int, int);

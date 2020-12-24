@@ -18,6 +18,7 @@ using namespace std;
 #include "dodecahedron.hpp"
 #include "Arrow.hpp"
 #include "ant.hpp"
+#include "Tela.hpp"
 
 class POVRayWriter
 {
@@ -62,11 +63,13 @@ class POVRayWriter
 
         //Funciones auxiliares
     void writeVector(double x, double y, double z);
+    void writeVectorP(VectorND v);
     void writeScaleVector(double x, double y, double z);
 
     public:
     ofstream writer;
-    POVRayWriter(string path);
+    //POVRayWriter(string path);
+    void initPovRay(string path);
 
     void createIniFile(string path, int frames, int initClock, int endClock);
     void createIniFile(string path, int frames);
@@ -78,6 +81,7 @@ class POVRayWriter
     void closePOVRayWriter();
     void rotClockZ();
     void rotClockY();
+    void TILEFLOOR();
 
     //geometry
     void createSphere(double r, VectorND centro, int mod);
@@ -92,10 +96,12 @@ class POVRayWriter
     void renderArrow(Arrow arrow, RotationMats, int);
     void renderAnt(Ant ant, RotationMats, int);
     void renderSquare(Square square, RotationMats, int);
+    void renderSquare2(Square square, RotationMats, int);
     void renderSpaceCurve(SpaceCurve, RotationMats, int);
     void renderAristaType1(Arista, RotationMats, double, int);
     void renderMatrixArista(MatrixArista, RotationMats, double, int);
-
+    void renderTorus(Torus torus, RotationMats U, int n);
+    void renderTela(Tela tela, RotationMats U, int n, int auxI);
     void text(string tex, double size, VectorND position, double angleRotY, string color);
 
     //textures
@@ -118,7 +124,19 @@ class POVRayWriter
 
     //conditionals
     void ifStatement(const char*);
+};
 
+class MatrixPOVRayWriter {
+public:
+
+    int m;
+    POVRayWriter * * A;
+
+    //void initPovs() {
+    //    this->m = m;
+    //    this->A = (POVRayWriter *) malloc (m * sizeof(POVRayWriter));
+//
+    //}
 };
 
 #endif

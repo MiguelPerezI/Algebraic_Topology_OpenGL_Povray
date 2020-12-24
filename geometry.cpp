@@ -91,6 +91,7 @@ void Facet::updateFacet(VectorND a, VectorND b, VectorND c) {
 	this->updatePrime();
 }
 
+
 void Facet::renderFacetOpenGL(int mod, RotationMats U) {
 
 //	if (mod%8 == 0) glColor3ub(255, 255, 255);
@@ -102,23 +103,8 @@ void Facet::renderFacetOpenGL(int mod, RotationMats U) {
 //	if (mod%8 == 6) glColor3ub(255, 150, 	 0);
 //	if (mod%8 == 7) glColor3ub(255,   0, 	 0);
 
-	double white = 255;
-	double red = 255;
-	double green = 195;
-	double blue = 170;
-	double pr = white/12;
-	if (mod%12 == 11) glColor3ub(12*red*pr, 12*green*pr, 12*blue*pr);
-	if (mod%12 == 10) glColor3ub(11*red*pr, 11*green*pr, 11*blue*pr);
-	if (mod%12 == 9) glColor3ub(10*red*pr, 10*green*pr, 10*blue*pr);
-	if (mod%12 == 8) glColor3ub( 9*red*pr,  9*green*pr,  9*blue*pr);
-	if (mod%12 == 7) glColor3ub( 8*red*pr,  8*green*pr,  8*blue*pr);
-	if (mod%12 == 6) glColor3ub( 7*red*pr,  7*green*pr,  7*blue*pr);
-	if (mod%12 == 5) glColor3ub( 6*red*pr,  6*green*pr,  6*blue*pr);
-	if (mod%12 == 4) glColor3ub( 5*red*pr,  5*green*pr,  5*blue*pr);
-	if (mod%12 == 3) glColor3ub( 4*red*pr,  4*green*pr,  4*blue*pr);
-	if (mod%12 == 2) glColor3ub( 3*red*pr,  3*green*pr,  3*blue*pr);
-	if (mod%12 == 1) glColor3ub( 2*red*pr,  2*green*pr,  2*blue*pr);
-	if (mod%12 == 0) glColor3ub( 1*red*pr,  1*green*pr,  1*blue*pr);
+	double shadow = (double)mod / 765;
+	glColor3ub(255 * shadow, 255 * shadow, 255 * shadow);
 
 	U.rot3D(this->normal);
 	glBegin(GL_TRIANGLES);
@@ -431,7 +417,7 @@ void CubeNeighborhood::copyCube(CubeNeighborhood copyFrom) {
 void CubeNeighborhood::renderCubeNeighborhood(RotationMats U) {
 
 	for (int i = 0; i < 12; i++)
-		this->mesh.getFacet(0, i).renderFacetOpenGL(0, U);
+		this->mesh.getFacet(0, i).renderFacetOpenGL(760, U);
 }
 
 VectorND CubeNeighborhood::getVertex(int i) {
@@ -1289,6 +1275,21 @@ void Inversion::applyInversion(VectorND p) {
 	}
 }
 
+void Inversion::facetInversion(Facet f) {
+
+	
+	this->a.updateVector3D(f.pointA()[0], f.pointA()[1], f.pointA()[2]);
+	this->b.updateVector3D(f.pointB()[0], f.pointB()[1], f.pointB()[2]);
+	this->c.updateVector3D(f.pointC()[0], f.pointC()[1], f.pointC()[2]);
+
+	this->applyInversion(a);
+	this->applyInversion(b);
+	this->applyInversion(c);
+
+	this->facet.updateFacet(a, b, c);
+
+}
+
 VectorND Inversion::returnInversion(VectorND p) {
 	this->aux.updateVector3D(p.access(0), p.access(1), p.access(2));
 	this->applyInversion(aux);
@@ -1325,6 +1326,12 @@ void Square::renderSquare(int mod, RotationMats U) {
 	this->mesh.getFacet(0, 1).renderFacetOpenGL(mod, U);
 }
 
+void Square::prepareInverionA_B(Inversion inversionA, Inversion inversionB) {
+
+	inversionA.facetInversion(this->mesh.getFacet(0, 0));
+	inversionB.facetInversion(this->mesh.getFacet(0, 1));
+}
+
 void MatrixSquare::initMatrixSquare(int m, int n) {
 
 	this->m = m;
@@ -1336,6 +1343,51 @@ void MatrixSquare::initMatrixSquare(int m, int n) {
 	      	
 	    
   	
+}
+
+void Plane::initPlane(int, double, VectorND) {
+
+	this->n = n;
+	this->R = R;
+	this->center.initVectorNDType2(3);
+	this->center.updateVector3DP(center);
+
+	for (int i = 0; i < 4; i++)
+		aux[i].initVectorNDType2(3);
+
+	this->mesh.initMatrixSquare(n, n);
+
+	double stepU = R/(double)n;
+	double stepV = R/(double)n;
+
+	for (int i = 0; i < n; i++)
+		for (int j = 0; j < n; j++) {
+			double u1 = (double)i * stepU;
+			double v1 = (double)j * stepV;
+
+			double u2 = ((double)i * stepU) + stepU;
+			double v2 = (double)j * stepV;
+
+			double u3 = (double)i * stepU + stepU;
+			double v3 = (double)j * stepV + stepV;
+
+			double u4 = (double)i * stepU;
+			double v4 = (double)j * stepV + stepV;
+
+			this->aux[0].updateVector3D(u1, v1, 0.0);
+			this->aux[1].updateVector3D(u2, v2, 0.0);
+			this->aux[2].updateVector3D(u3, v3, 0.0);
+			this->aux[3].updateVector3D(u4, v4, 0.0);
+
+			this->mesh.A[i][j].initSquare(this->aux[0], this->aux[1], this->aux[2], this->aux[3]);
+		}
+}
+
+void Plane::renderPlane(int mod, RotationMats U) {
+
+	for (int i = 0; i < this->mesh.m; i++)
+		for (int j = 0; j < this->mesh.n; j++)
+			this->mesh.A[i][j].renderSquare(mod, U);
 }
 
 void Sphere::initSphere(int n, double R, VectorND center) {
@@ -1383,6 +1435,16 @@ void Sphere::renderSphere(int mod, RotationMats U) {
 			this->mesh.A[i][j].renderSquare(mod, U);
 }
 
+void Sphere::renderByInversion(Inversion inversionA, Inversion inversionB, RotationMats U) {
+
+	for (int i = 0; i < this->mesh.m; i++)
+		for (int j = 0; j < this->mesh.n; j++) {
+			this->mesh.A[i][j].prepareInverionA_B(inversionA, inversionB);
+			inversionA.getFacet().renderFacetOpenGL(760, U);
+			inversionB.getFacet().renderFacetOpenGL(760, U);
+		}
+}
+
 void MatrixSphere::initMatrixSphere(int m, int n) {
 
 	this->m = m;
@@ -1400,6 +1462,16 @@ void MatrixSphere::initMatrixSphere(int m, int n) {
 	      	}
 	    }
   	}
+
+
+}
+
+void MatrixSphere::renderInvMatrixSphere(Inversion inversionA, Inversion inversionB, RotationMats U) {
+
+	for (int i = 0; i < this->m; i++)
+		for (int j = 0; j < this->n; j++) {
+			this->A[i][j].renderByInversion(inversionA, inversionB, U);
+		}
 }
 
 void MatrixSphereList::initMatrixSphereList(int m) {
@@ -1451,6 +1523,16 @@ void Torus::initTorus(int n, double R, double r, VectorND center) {
 			this->aux[3].updateVector3D((R + (r * cos(u4))) * cos(v4) + center.access(0), (R + (r * cos(u4))) * sin(v4) + center.access(1), r * sin(u4) + center.access(2));
 
 			this->mesh.A[i][j].initSquare(this->aux[0], this->aux[1], this->aux[2], this->aux[3]);
+		}
+}
+
+void Torus::renderByInversion(Inversion inversionA, Inversion inversionB, RotationMats U) {
+
+	for (int i = 0; i < this->mesh.m; i++)
+		for (int j = 0; j < this->mesh.n; j++) {
+			this->mesh.A[i][j].prepareInverionA_B(inversionA, inversionB);
+			inversionA.getFacet().renderFacetOpenGL(760, U);
+			inversionB.getFacet().renderFacetOpenGL(760, U);
 		}
 }
 
